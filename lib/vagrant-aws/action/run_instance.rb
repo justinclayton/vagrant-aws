@@ -34,6 +34,7 @@ module VagrantPlugins
           security_groups    = region_config.security_groups
           subnet_id          = region_config.subnet_id
           tags               = region_config.tags
+          ebs_volume         = region_config.ebs_volume
 
           # If there is no keypair then warn the user
           if !keypair
@@ -118,6 +119,11 @@ module VagrantPlugins
             end
 
             @logger.info("Time for SSH ready: #{env[:metrics]["instance_ssh_time"]}")
+
+            if ebs_volume
+              env[:ui].info("Attaching EBS volume #{ebs_volume[:volume_id]} to instance as #{ebs_volume[:device_name]}...")
+              env[:aws_compute].attach_volume(env[:machine].id, ebs_volume[:volume_id], ebs_volume[:device_name])
+            end
 
             # Ready and booted!
             env[:ui].info(I18n.t("vagrant_aws.ready"))
